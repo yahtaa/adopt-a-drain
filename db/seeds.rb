@@ -1,32 +1,26 @@
-
-
-
 require 'csv'
 require 'open-uri'
 
 
-def read(url)
-	puts 'connecting'
-  open(url) do |f|
-		puts 'downloading'
-    f.each_line do |l|
-      CSV.parse(l) do |row|
-				id = row[0]
-				long = row[3]
-				lat = row[4]
-				Thing.create(:city_id =>  id, :lng => long, :lat=> lat)
-      end
-    end 
-  end
-end 
 
+url = 'http://data.openoakland.org/storage/f/2012-11-01T014902/Inlets.csv'
 
-url = 'http://data.openoakland.org/storage/f/2012-10-31T061004/oakdrainsgeo.csv'
-read(url)
+puts 'connecting'
+open(url) do |f|
+	puts 'downloading'
+  f.each_line do |l|
+    CSV.parse(l) do |row|
+			city_id = row[0].to_i
+			lat = row[6].to_f.round(10)
+			long = row[7].to_f.round(10)
 
-
-
-
+    	if city_id > 1
+				puts "#{city_id} #{long} #{lat} "
+				Thing.create(:city_id =>  city_id, :lng => long, :lat=> lat)
+			end
+    end
+  end 
+end
 
 
 # Thing.create(:city_id =>  1, :lng => -157.74898782223062, :lat=> 21.376607020832314)
