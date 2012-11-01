@@ -2,7 +2,7 @@ class ThingsController < ApplicationController
   respond_to :json
 
   def show
-    @things = Thing.all( :include => [:users])
+    @things = Thing.limit(1000)
 
     unless @things.blank?
       for t in @things
