@@ -5,6 +5,8 @@ require 'open-uri'
 
 url = 'http://data.openoakland.org/storage/f/2012-11-01T014902/Inlets.csv'
 
+puts 'removing old things data'
+Thing.destroy_all
 puts 'connecting'
 open(url) do |f|
   puts 'downloading'
