@@ -58,6 +58,6 @@ module AdoptAThing
     config.assets.version = '1.0'
 
     # Limit on number of things to be returned from the database
-    config.things_limit = 10
+    config.things_limit = 100
   end
 end

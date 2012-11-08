@@ -2,7 +2,10 @@ class ThingsController < ApplicationController
   respond_to :json
 
   def show
-    @things = Thing.limit(Rails.application.config.things_limit)
+    @things = Thing.where("lat < ? AND lat > ? AND lng < ? AND lng > ? ", params[:NE][:lat], params[:SW][:lat], params[:NE][:lng], params[:SW][:lng]).limit(200)
+
+
+
 
     unless @things.blank?
       for t in @things
