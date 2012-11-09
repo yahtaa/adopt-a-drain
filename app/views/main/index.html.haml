@@ -22,16 +22,16 @@
           %a{:href => "http://codeforamerica.org/"}
             = image_tag "logos/cfa.png", :alt => t("sponsors.cfa"), :title => t("sponsors.cfa")
         #col2
-          %a{:href => "http://www.honolulu.gov/"}
-            = image_tag "logos/cchonolulu.png", :alt => t("sponsors.city"), :title => t("sponsors.city")
+          %a{:href => "http://www2.oaklandnet.com/"}
+            = image_tag "logos/oakland-seal.jpeg", :width => '90px', :alt => t("sponsors.city"), :title => t("sponsors.city")
           %p#mayor
-            %a{:href => "http://www1.honolulu.gov/mayor/"}
+            %a{:href => "http://www2.oaklandnet.com/"}
               = t("sponsors.mayor.name") +", "+ t("sponsors.mayor.title") 
                 
 
       #feedback
         %p
-          %a{:href => URI.escape("mailto:dem@honolulu.gov?subject=#{t("titles.main", :thing => t("defaults.thing").titleize)} #{t("links.feedback").titleize}")}
+          %a{:href => URI.escape("mailto:nneditch@oaklandnet.com?subject=#{t("titles.main", :thing => t("defaults.thing").titleize)} #{t("links.feedback").titleize}")}
             = t("links.feedback")
     .table-cell.map-container
       #map
