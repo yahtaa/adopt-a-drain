@@ -1,4 +1,4 @@
-# Adopt-a-Siren [![Build Status](https://secure.travis-ci.org/codeforamerica/adopt-a-siren.png?branch=master)][travis] [![Dependency Status](https://gemnasium.com/codeforamerica/adopt-a-siren.png?travis)][gemnasium]
+# Adopt-a-Drain [![Build Status](https://secure.travis-ci.org/codeforamerica/adopt-a-siren.png?branch=master)][travis] [![Dependency Status](https://gemnasium.com/codeforamerica/adopt-a-siren.png?travis)][gemnasium]
 Claim responsibility for reporting problems with Storm Drains
 
 [travis]: http://travis-ci.org/openoakland/adopt-a-drain
