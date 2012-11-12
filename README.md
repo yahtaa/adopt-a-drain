@@ -1,23 +1,23 @@
 # Adopt-a-Siren [![Build Status](https://secure.travis-ci.org/codeforamerica/adopt-a-siren.png?branch=master)][travis] [![Dependency Status](https://gemnasium.com/codeforamerica/adopt-a-siren.png?travis)][gemnasium]
-Claim responsibility for reporting problems with Sirens
+Claim responsibility for reporting problems with Storm Drains
 
-[travis]: http://travis-ci.org/codeforamerica/adopt-a-siren
-[gemnasium]: https://gemnasium.com/codeforamerica/adopt-a-siren
+[travis]: http://travis-ci.org/openoakland/adopt-a-drain
+[gemnasium]: https://gemnasium.com/openoakland/adopt-a-drain
 
 ## <a name="screenshots"></a>Screenshot
-![Adopt-a-Siren](https://github.com/codeforamerica/adopt-a-siren/raw/master/screenshot.png "Adopt-a-Siren")
+![Adopt-a-Siren](https://github.com/openoakland/adopt-a-drain/raw/master/screenshot.png "Adopt-a-Siren")
 
 ## <a name="demo"></a>Demo
 You can see a running version of the application at
-[http://hnlsiren.herokuapp.com/][demo].
+[http://adopt-a-drain.herokuapp.com/][demo].
 
-[demo]: http://hnlsiren.herokuapp.com/
+[demo]: http://adopt-a-drain.herokuapp.com/
 
 ## <a name="installation"></a>Installation
 This application requires [Postgres](http://www.postgresql.org/) to be installed
 
-    git clone git://github.com/codeforamerica/adopt-a-siren.git
-    cd adopt-a-siren
+    git clone git://github.com/openoakland/adopt-a-drain.git
+    cd adopt-a-drain
     bundle install
 
     bundle exec rake db:create
