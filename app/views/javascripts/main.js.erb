@@ -1,36 +1,43 @@
 $(function() {
 
-  navigator.geolocation.getCurrentPosition(
+  // navigator.geolocation.getCurrentPosition(
 
-    function(position){
+  //   function(position){
 
-      console.log( "Geo-Location Found" );
+  //     console.log( "Geo-Location Found" );
 
-      var current_lat = position.coords.latitude;
-      var current_long = position.coords.longitude;
+  //     var current_lat = position.coords.latitude;
+  //     var current_long = position.coords.longitude;
 
-      load_map(current_lat, current_long);
-    },
-    function( error ){
+  //     load_map(current_lat, current_long);
+  //   },
+  //   function( error ){
 
-      console.log( "Using Default Position " );
+  //     console.log( "Using Default Position " );
 
-      var current_lat = 37.804855;
-      var current_long = -122.271304;
+  //     var current_lat = 37.804855;
+  //     var current_long = -122.271304;
 
-      load_map(current_lat, current_long);
+  //     load_map(current_lat, current_long);
 
-    },
-    {
-      timeout: (5 * 1000),
-      maximumAge: (1000 * 60 * 15),
-      enableHighAccuracy: true
-    }
-  );
+  //   },
+  //   {
+  //     timeout: (5 * 1000),
+  //     maximumAge: (1000 * 60 * 15),
+  //     enableHighAccuracy: true
+  //   }
+  // );
 
 
+  console.log( "Using Default Position " );
 
-  var load_map = function( current_lat, current_long ){
+  var current_lat = 37.804855;
+  var current_long = -122.271304;
+
+  // load_map(current_lat, current_long);
+
+
+  (function(){
    
     var locationMarker;
     // Check to see if there is already a location.
@@ -53,15 +60,15 @@ $(function() {
       // keyboardShortcuts: false,
       mapTypeControl: false,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      maxZoom: 18,
-      minZoom: 18,
+      maxZoom: 19,
+      minZoom: 17,
       panControl: false,
       rotateControl: false,
       scaleControl: false,
       scrollwheel: true,
       streetViewControl: true,
       zoom: 18,
-      zoomControl: false
+      zoomControl: true
     };
     var map = new google.maps.Map(document.getElementById("map"), mapOptions);
     var size = new google.maps.Size(29.0, 37.0);
@@ -847,7 +854,7 @@ $(function() {
     //   keyboard: true
     // });       
 
-  }
+  })();
 
 
 });
