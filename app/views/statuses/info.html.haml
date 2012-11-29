@@ -3,11 +3,9 @@
 
 %p
   - if @statusCode==1
-    = "Thanks for reporting that the siren is working"
+    = "Thanks for reporting that the drain is clean"
   - if @statusCode==2
-    = "Thanks for reporting a malfunctioning siren, please give more detail about the problem"
-    %a{:href=>"http://www3.honolulu.gov/DEMSiren/", :target=>"_blank"}
-      = "here."
+    = "Thanks for reporting a malfunctioning drain"
   - if @statusCode==3
-    = "Thanks. Maybe consider adopting a siren near where were you are on work days."
+    = "Thanks. Consider adopting a drain near where were you are on work days."
 
