@@ -29,7 +29,7 @@ $(function() {
   // );
 
 
-  console.log( "Using Default Position " );
+  // console.log( "Using Default Position " );
 
   var current_lat = 37.804855;
   var current_long = -122.271304;
@@ -48,8 +48,8 @@ $(function() {
     }
      
 
-    console.log("current_lat" + current_lat);
-    console.log("current_long" + current_long);
+    // console.log("current_lat" + current_lat);
+    // console.log("current_long" + current_long);
 
 
 
@@ -206,7 +206,7 @@ $(function() {
       });
     }
     var urlActions = function(){
-      console.log(window.location.hash)
+      // console.log(window.location.hash)
       if(window.location.hash.length > 0){
         //#2:54:failed
         var hash = window.location.hash.substring(1, window.location.hash.length);
@@ -255,7 +255,7 @@ $(function() {
                             statusCode:parts[2]};
 
           $.ajax("/status.json", {type:"POST", data:statusData, success:function(data){
-            console.log("Thanks for reporting");
+            // console.log("Thanks for reporting");
           }},"json");
         }
 
