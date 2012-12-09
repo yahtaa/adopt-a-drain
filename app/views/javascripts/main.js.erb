@@ -1,171 +1,275 @@
-$(function() {
+$(document).ready(function() {
 
-  // navigator.geolocation.getCurrentPosition(
-
-  //   function(position){
-
-  //     console.log( "Geo-Location Found" );
-
-  //     var current_lat = position.coords.latitude;
-  //     var current_long = position.coords.longitude;
-
-  //     load_map(current_lat, current_long);
-  //   },
-  //   function( error ){
-
-  //     console.log( "Using Default Position " );
-
-  //     var current_lat = 37.804855;
-  //     var current_long = -122.271304;
-
-  //     load_map(current_lat, current_long);
-
-  //   },
-  //   {
-  //     timeout: (5 * 1000),
-  //     maximumAge: (1000 * 60 * 15),
-  //     enableHighAccuracy: true
-  //   }
-  // );
-
-
-  // console.log( "Using Default Position " );
 
   var current_lat = 37.804855;
   var current_long = -122.271304;
-
-  // load_map(current_lat, current_long);
-
-
-  (function(){
+ 
+  var locationMarker;
+  // Check to see if there is already a location.
+  // There is a bug in FireFox where this gets
+  // invoked more than once with a cahced result.
+  if (locationMarker){
+    return;
+  }
    
-    var locationMarker;
-    // Check to see if there is already a location.
-    // There is a bug in FireFox where this gets
-    // invoked more than once with a cahced result.
-    if (locationMarker){
-      return;
+
+  // console.log("current_lat" + current_lat);
+  // console.log("current_long" + current_long);
+
+
+
+  var center = new google.maps.LatLng(current_lat, current_long);
+  var mapOptions = {
+    center: center,
+    disableDoubleClickZoom: false,
+    mapTypeControl: false,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    maxZoom: 19,
+    minZoom: 17,
+    panControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    scrollwheel: true,
+    streetViewControl: true,
+    zoom: 18,
+    zoomControl: true
+  };
+
+  var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+  var size = new google.maps.Size(29.0, 37.0);
+  var origin = new google.maps.Point(0, 0);
+  var anchor = new google.maps.Point(13.0, 18.0);
+  var greenMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/green-marker.png' %>',
+    size,
+    origin,
+    anchor
+  );
+  
+  var greenStarMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/green_star.png' %>',
+    size,
+    origin,
+    anchor
+  );
+  var orangeMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/orange-marker.png' %>',
+    size,
+    origin,
+    anchor
+  );
+  var markerShadowImage = new google.maps.MarkerImage('<%= image_path 'markers/shadow.png' %>',
+    new google.maps.Size(46.0, 37.0),
+    origin,
+    anchor
+  );
+
+
+  var activeThingId;
+  var activeMarker;
+  var activeInfoWindow;
+  var isWindowOpen = false;
+  var thingIds = [];
+  var markers = [];
+  function addMarker(thingId, point, color) {
+    if(color == 'green') {
+      var image = greenMarkerImage;
+    } else if(color == 'orange') {
+      var image = orangeMarkerImage;
+    } else if(color == 'green_star'){
+      var image = greenStarMarkerImage;
     }
-     
-
-    // console.log("current_lat" + current_lat);
-    // console.log("current_long" + current_long);
-
-
-
-    var center = new google.maps.LatLng(current_lat, current_long);
-    var mapOptions = {
-      center: center,
-      disableDoubleClickZoom: false,
-      // keyboardShortcuts: false,
-      mapTypeControl: false,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      maxZoom: 19,
-      minZoom: 17,
-      panControl: false,
-      rotateControl: false,
-      scaleControl: false,
-      scrollwheel: true,
-      streetViewControl: true,
-      zoom: 18,
-      zoomControl: true
-    };
-    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-    var size = new google.maps.Size(29.0, 37.0);
-    var origin = new google.maps.Point(0, 0);
-    var anchor = new google.maps.Point(13.0, 18.0);
-    var greenMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/green-marker.png' %>',
-      size,
-      origin,
-      anchor
-    );
-    var greenStarMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/green_star.png' %>',
-      size,
-      origin,
-      anchor
-    );
-    var orangeMarkerImage = new google.maps.MarkerImage('<%= image_path 'markers/orange-marker.png' %>',
-      size,
-      origin,
-      anchor
-    );
-    var markerShadowImage = new google.maps.MarkerImage('<%= image_path 'markers/shadow.png' %>',
-      new google.maps.Size(46.0, 37.0),
-      origin,
-      anchor
-    );
-
-
-    var activeThingId;
-    var activeMarker;
-    var activeInfoWindow;
-    var isWindowOpen = false;
-    var thingIds = [];
-    var markers = [];
-    function addMarker(thingId, point, color) {
-      if(color == 'green') {
-        var image = greenMarkerImage;
-      } else if(color == 'orange') {
-        var image = orangeMarkerImage;
-      } else if(color == 'green_star'){
-        var image = greenStarMarkerImage;
+    var marker = new google.maps.Marker({
+      animation: google.maps.Animation.DROP,
+      icon: image,
+      map: map,
+      position: point,
+      shadow: markerShadowImage,
+      thingId:thingId
+    });
+    markers.push(marker);
+    google.maps.event.addListener(marker, 'click', function() {
+      if(activeInfoWindow) {
+        activeInfoWindow.close();
       }
-      var marker = new google.maps.Marker({
-        animation: google.maps.Animation.DROP,
-        icon: image,
-        map: map,
-        position: point,
-        shadow: markerShadowImage,
-        thingId:thingId
+      var infoWindow = new google.maps.InfoWindow({
+        maxWidth: 210
       });
-      markers.push(marker);
-      google.maps.event.addListener(marker, 'click', function() {
-        if(activeInfoWindow) {
-          activeInfoWindow.close();
-        }
-        var infoWindow = new google.maps.InfoWindow({
-          maxWidth: 210
-        });
-        google.maps.event.addListener(infoWindow, 'closeclick', function() {
-          isWindowOpen = false;
-        });
-        activeInfoWindow = infoWindow;
-        activeThingId = thingId;
-        activeMarker = marker;
-        $.ajax({
-          type: 'GET',
-          url: '/info_window',
-          data: {
-            'thing_id': thingId
-          },
-          success: function(data) {
-            // Prevent race condition, which could lead to multiple windows being open at the same time.
-            if(infoWindow == activeInfoWindow) {
-              infoWindow.setContent(data);
-              infoWindow.open(map, marker);
-              isWindowOpen = true;
-            }
-          }
-        });
+      google.maps.event.addListener(infoWindow, 'closeclick', function() {
+        isWindowOpen = false;
       });
-      thingIds.push(thingId);
-    }
-    function addMarkersAround(lat, lng, NE, SW) {
-      var submitButton = $("#address_form input[type='submit']");
+      activeInfoWindow = infoWindow;
+      activeThingId = thingId;
+      activeMarker = marker;
       $.ajax({
         type: 'GET',
-        url: '/things.json',
+        url: '/info_window',
+        data: {
+          'thing_id': thingId
+        },
+        success: function(data) {
+          // Prevent race condition, which could lead to multiple windows being open at the same time.
+          if(infoWindow == activeInfoWindow) {
+            infoWindow.setContent(data);
+            infoWindow.open(map, marker);
+            isWindowOpen = true;
+          }
+        }
+      });
+    });
+    thingIds.push(thingId);
+  }
+  function addMarkersAround(lat, lng, NE, SW) {
+    var submitButton = $("#address_form input[type='submit']");
+    $.ajax({
+      type: 'GET',
+      url: '/things.json',
+      data: {
+        // 'utf8': '✓',
+        'authenticity_token': $('#address_form input[name="authenticity_token"]').val(),
+        'NE': NE,
+        'SW': SW,
+        'lat': lat,
+        'lng': lng,
+        'limit': $('#address_form input[name="limit"]').val()
+      },
+      error: function(jqXHR) {
+        $(submitButton).attr("disabled", false);
+      },
+      success: function(data) {
+        $(submitButton).attr("disabled", false);
+        if(data.errors) {
+          $('#address').parent().addClass('error');
+          $('#address').focus();
+        } else {
+          $('#address_label').removeClass('error', 500);
+          $('#address').removeClass('error', 500);
+          var i = -1;
+          $(data).each(function(index, thing) {
+            if($.inArray(thing.id, thingIds) == -1) {
+              i += 1;
+            } else {
+              // continue
+              return true;
+            }
+            
+            var point = new google.maps.LatLng(thing.lat, thing.lng);
+            var color = 'orange';
+            if(thing.users.length > 0) {
+              color = 'green';
+            }
+            if(thing.owned_by_you){
+              color = 'green_star';
+            }              
+            
+            addMarker(thing.id, point, color);
+            
+            if(index == data.length -1){
+              //after markers are added
+              urlActions();
+            }
+
+          });
+        }
+      }
+    });
+  }
+  var urlActions = function(){
+    // console.log(window.location.hash)
+    if(window.location.hash.length > 0){
+      //#2:54:failed
+      var hash = window.location.hash.substring(1, window.location.hash.length);
+      var parts = hash.split(":");
+      if(parts.length > 2){
+
+        // use thing_id to highlight the thing we are talking about.
+
+        for(m in markers){
+          if(markers[m].thingId == parts[1]){
+            if(activeInfoWindow) {
+              activeInfoWindow.close();
+            }
+            var infoWindow = new google.maps.InfoWindow({
+              maxWidth: 210
+            });
+            google.maps.event.addListener(infoWindow, 'closeclick', function() {
+              isWindowOpen = false;
+            }); 
+            activeInfoWindow = infoWindow;
+            activeThingId = parts[1];
+            activeMarker = markers[m];
+            $.ajax({
+              type: 'GET',
+              url: '/status/info',
+              data: {
+                'thing_id': parts[1],
+                'statuscode':parts[2]
+              },
+              success: function(data) {
+                // Prevent race condition, which could lead to multiple windows being open at the same time.
+                if(infoWindow == activeInfoWindow) {
+                  infoWindow.setContent(data);
+                  infoWindow.open(map, markers[m]);
+                  isWindowOpen = true;
+                }
+              }
+            });
+            break;
+          }
+        }
+
+
+        var statusData = {user: parts[0],
+                          thing:parts[1],
+                          statusCode:parts[2]};
+
+        $.ajax("/status.json", {type:"POST", data:statusData, success:function(data){
+          // console.log("Thanks for reporting");
+        }},"json");
+      }
+
+    }
+  
+  }
+  google.maps.event.addListener(map, 'idle', function() {
+    markers = [];
+    var bounds = map.getBounds();
+    var NE = {lat: bounds.getNorthEast().lat(),  lng: bounds.getNorthEast().lng()};
+    var SW = {lat: bounds.getSouthWest().lat(),  lng: bounds.getSouthWest().lng()};
+
+    // console.log(NE);
+    // console.log(SW);
+    // console.log(center.lat());
+    // console.log(center.lng());
+    addMarkersAround(center.lat(), center.lng(), NE, SW) ;
+  });
+
+
+
+  google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
+    // addMarkersAround(center.lat(), center.lng(), null, null) ;
+
+
+  });
+
+  $('#address_form').live('submit', function() {
+    var submitButton = $("#address_form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    if($('#address').val() === '') {
+      $(submitButton).attr("disabled", false);
+      $('#address').parent().addClass('error');
+      $('#address').focus();
+    } else {
+      $.ajax({
+        type: 'GET',
+        url: '/address.json',
         data: {
           'utf8': '✓',
           'authenticity_token': $('#address_form input[name="authenticity_token"]').val(),
-          'NE': NE,
-          'SW': SW,
-          'lat': lat,
-          'lng': lng,
-          'limit': $('#address_form input[name="limit"]').val()
+          'city_state': $('#city_state').val(),
+          'address': $('#address').val()
         },
         error: function(jqXHR) {
           $(submitButton).attr("disabled", false);
+          $('#address').parent().addClass('error');
+          $('#address').focus();
         },
         success: function(data) {
           $(submitButton).attr("disabled", false);
@@ -175,493 +279,77 @@ $(function() {
           } else {
             $('#address_label').removeClass('error', 500);
             $('#address').removeClass('error', 500);
-            var i = -1;
-            $(data).each(function(index, thing) {
-              if($.inArray(thing.id, thingIds) == -1) {
-                i += 1;
-              } else {
-                // continue
-                return true;
-              }
-              
-              var point = new google.maps.LatLng(thing.lat, thing.lng);
-              var color = 'orange';
-              if(thing.users.length > 0) {
-                color = 'green';
-              }
-              if(thing.owned_by_you){
-                color = 'green_star';
-              }              
-              
-              addMarker(thing.id, point, color);
-              
-              if(index == data.length -1){
-                //after markers are added
-                urlActions();
-              }
-
-            });
+            var center = new google.maps.LatLng(data[0], data[1]);
+            map.setCenter(center);
+            map.setZoom(16);
           }
         }
       });
     }
-    var urlActions = function(){
-      // console.log(window.location.hash)
-      if(window.location.hash.length > 0){
-        //#2:54:failed
-        var hash = window.location.hash.substring(1, window.location.hash.length);
-        var parts = hash.split(":");
-        if(parts.length > 2){
-
-          // use thing_id to highlight the thing we are talking about.
-
-          for(m in markers){
-            if(markers[m].thingId == parts[1]){
-              if(activeInfoWindow) {
-                activeInfoWindow.close();
-              }
-              var infoWindow = new google.maps.InfoWindow({
-                maxWidth: 210
-              });
-              google.maps.event.addListener(infoWindow, 'closeclick', function() {
-                isWindowOpen = false;
-              }); 
-              activeInfoWindow = infoWindow;
-              activeThingId = parts[1];
-              activeMarker = markers[m];
-              $.ajax({
-                type: 'GET',
-                url: '/status/info',
-                data: {
-                  'thing_id': parts[1],
-                  'statuscode':parts[2]
-                },
-                success: function(data) {
-                  // Prevent race condition, which could lead to multiple windows being open at the same time.
-                  if(infoWindow == activeInfoWindow) {
-                    infoWindow.setContent(data);
-                    infoWindow.open(map, markers[m]);
-                    isWindowOpen = true;
-                  }
-                }
-              });
-              break;
-            }
-          }
-
-
-          var statusData = {user: parts[0],
-                            thing:parts[1],
-                            statusCode:parts[2]};
-
-          $.ajax("/status.json", {type:"POST", data:statusData, success:function(data){
-            // console.log("Thanks for reporting");
-          }},"json");
-        }
-
+    return false;
+  });
+  // Focus on the first non-empty text input or password field
+  function setComboFormFocus() {
+    $('#combo-form input[type="email"], #combo-form input[type="text"]:visible, #combo-form input[type="password"]:visible, #combo-form input[type="submit"]:visible, #combo-form input[type="tel"]:visible, #combo-form button:visible').each(function(index) {
+      if($(this).val() === "" || $(this).attr('type') === 'submit' || this.tagName.toLowerCase() === 'button') {
+        $(this).focus();
+        return false;
       }
-    
-    }
-
-
-    google.maps.event.addListener(map, 'idle', function() {
-      markers = [];
-      var bounds = map.getBounds();
-      var NE = {lat: bounds.getNorthEast().lat(),  lng: bounds.getNorthEast().lng()};
-      var SW = {lat: bounds.getSouthWest().lat(),  lng: bounds.getSouthWest().lng()};
-
-      // console.log(NE);
-      // console.log(SW);
-      // console.log(center.lat());
-      // console.log(center.lng());
-      
-      addMarkersAround(center.lat(), center.lng(), NE, SW) ;
     });
-
-
-
-    google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-      // addMarkersAround(center.lat(), center.lng(), null, null) ;
-
-
-    });
-    $('#address_form').live('submit', function() {
-      var submitButton = $("#address_form input[type='submit']");
-      $(submitButton).attr("disabled", true);
-      if($('#address').val() === '') {
-        $(submitButton).attr("disabled", false);
-        $('#address').parent().addClass('error');
-        $('#address').focus();
-      } else {
-        $.ajax({
-          type: 'GET',
-          url: '/address.json',
-          data: {
-            'utf8': '✓',
-            'authenticity_token': $('#address_form input[name="authenticity_token"]').val(),
-            'city_state': $('#city_state').val(),
-            'address': $('#address').val()
-          },
-          error: function(jqXHR) {
-            $(submitButton).attr("disabled", false);
-            $('#address').parent().addClass('error');
-            $('#address').focus();
-          },
-          success: function(data) {
-            $(submitButton).attr("disabled", false);
-            if(data.errors) {
-              $('#address').parent().addClass('error');
-              $('#address').focus();
-            } else {
-              $('#address_label').removeClass('error', 500);
-              $('#address').removeClass('error', 500);
-              var center = new google.maps.LatLng(data[0], data[1]);
-              map.setCenter(center);
-              map.setZoom(16);
-            }
-          }
-        });
-      }
-      return false;
-    });
-    // Focus on the first non-empty text input or password field
-    function setComboFormFocus() {
-      $('#combo-form input[type="email"], #combo-form input[type="text"]:visible, #combo-form input[type="password"]:visible, #combo-form input[type="submit"]:visible, #combo-form input[type="tel"]:visible, #combo-form button:visible').each(function(index) {
-        if($(this).val() === "" || $(this).attr('type') === 'submit' || this.tagName.toLowerCase() === 'button') {
-          $(this).focus();
-          return false;
-        }
+  }
+  $('#combo-form input[type="radio"]').live('click', function() {
+    var radioInput = $(this);
+    if('new' == radioInput.val()) {
+      $('#combo-form').data('state', 'user_sign_up');
+      $('#user_forgot_password_fields').slideUp();
+      $('#user_sign_in_fields').slideUp();
+      $('#user_sign_up_fields').slideDown(function() {
+        setComboFormFocus();
       });
-    }
-    $('#combo-form input[type="radio"]').live('click', function() {
-      var radioInput = $(this);
-      if('new' == radioInput.val()) {
-        $('#combo-form').data('state', 'user_sign_up');
-        $('#user_forgot_password_fields').slideUp();
-        $('#user_sign_in_fields').slideUp();
-        $('#user_sign_up_fields').slideDown(function() {
-          setComboFormFocus();
-        });
-      } else if('existing' == radioInput.val()) {
-        $('#user_sign_up_fields').slideUp();
-        $('#user_sign_in_fields').slideDown(function() {
-          $('#combo-form').data('state', 'user_sign_in');
-          setComboFormFocus();
-          $('#user_forgot_password_link').click(function() {
-            $('#combo-form').data('state', 'user_forgot_password');
-            $('#user_sign_in_fields').slideUp();
-            $('#user_forgot_password_fields').slideDown(function() {
-              setComboFormFocus();
-              $('#user_remembered_password_link').click(function() {
-                $('#combo-form').data('state', 'user_sign_in');
-                $('#user_forgot_password_fields').slideUp();
-                $('#user_sign_in_fields').slideDown(function() {
-                  setComboFormFocus();
-                });
+    } else if('existing' == radioInput.val()) {
+      $('#user_sign_up_fields').slideUp();
+      $('#user_sign_in_fields').slideDown(function() {
+        $('#combo-form').data('state', 'user_sign_in');
+        setComboFormFocus();
+        $('#user_forgot_password_link').click(function() {
+          $('#combo-form').data('state', 'user_forgot_password');
+          $('#user_sign_in_fields').slideUp();
+          $('#user_forgot_password_fields').slideDown(function() {
+            setComboFormFocus();
+            $('#user_remembered_password_link').click(function() {
+              $('#combo-form').data('state', 'user_sign_in');
+              $('#user_forgot_password_fields').slideUp();
+              $('#user_sign_in_fields').slideDown(function() {
+                setComboFormFocus();
               });
             });
           });
         });
-      }
-    });
-    $('#combo-form').live('submit', function() {
-      var submitButton = $("#combo-form input[type='submit']");
-      $(submitButton).attr("disabled", true);
-      var errors = []
-      if(!/[\w\.%\+]+@[\w]+\.+[\w]{2,}/.test($('#user_email').val())) {
-        errors.push($('#user_email'));
-        $('#user_email').parent().addClass('error');
-      } else {
-        $('#user_email').parent().removeClass('error');
-      }
-      if(!$(this).data('state') || $(this).data('state') === 'user_sign_up') {
-        if($('#user_name').val() === '') {
-          errors.push($('#user_name'));
-          $('#user_name').parent().addClass('error');
-        } else {
-          $('#user_name').parent().removeClass('error');
-        }
-        if($('#user_password_confirmation').val().length < 6 || $('#user_password_confirmation').val().length > 20) {
-          errors.push($('#user_password_confirmation'));
-          $('#user_password_confirmation').parent().addClass('error');
-        } else {
-          $('#user_password_confirmation').parent().removeClass('error');
-        }
-        if(errors.length > 0) {
-          $(submitButton).attr("disabled", false);
-          errors[0].focus();
-        } else {
-          $.ajax({
-            type: 'POST',
-            url: '/users.json',
-            data: {
-              'utf8': '✓',
-              'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
-              'user': {
-                'email': $('#user_email').val(),
-                'name': $('#user_name').val(),
-                'organization': $('#user_organization').val(),
-                'voice_number': $('#user_voice_number').val(),
-                'sms_number': $('#user_sms_number').val(),
-                'password': $('#user_password_confirmation').val(),
-                'password_confirmation': $('#user_password_confirmation').val()
-              }
-            },
-            error: function(jqXHR) {
-              var data = $.parseJSON(jqXHR.responseText);
-              $(submitButton).attr("disabled", false);
-              if(data.errors.email) {
-                errors.push($('#user_email'));
-                $('#user_email').parent().addClass('error');
-              }
-              if(data.errors.name) {
-                errors.push($('#user_name'));
-                $('#user_name').parent().addClass('error');
-              }
-              if(data.errors.organization) {
-                errors.push($('#user_organization'));
-                $('#user_organization').parent().addClass('error');
-              }
-              if(data.errors.voice_number) {
-                errors.push($('#user_voice_number'));
-                $('#user_voice_number').parent().addClass('error');
-              }
-              if(data.errors.sms_number) {
-                errors.push($('#user_sms_number'));
-                $('#user_sms_number').parent().addClass('error');
-              }
-              if(data.errors.password) {
-                errors.push($('#user_password_confirmation'));
-                $('#user_password_confirmation').parent().addClass('error');
-              }
-              errors[0].focus();
-            },
-            success: function(data) {
-              $.ajax({
-                type: 'GET',
-                url: '/sidebar/search',
-                data: {
-                  'flash': {
-                    'notice': "<%= I18n.t("notices.signed_up") %>"
-                  }
-                },
-                success: function(data) {
-                  $('#content').html(data);
-                }
-              });
-            }
-          });
-        }
-      } else if($(this).data('state') === 'user_sign_in') {
-        if($('#user_password').val().length < 6 || $('#user_password').val().length > 20) {
-          errors.push($('#user_password'));
-          $('#user_password').parent().addClass('error');
-        } else {
-          $('#user_password').parent().removeClass('error');
-        }
-        if(errors.length > 0) {
-          $(submitButton).attr("disabled", false);
-          errors[0].focus();
-        } else {
-          $.ajax({
-            type: 'POST',
-            url: '/users/sign_in.json',
-            data: {
-              'utf8': '✓',
-              'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
-              'user': {
-                'email': $('#user_email').val(),
-                'password': $('#user_password').val(),
-                'remember_me': $('#user_remember_me').val()
-              }
-            },
-            error: function(jqXHR) {
-              $(submitButton).attr("disabled", false);
-              $('#user_password').parent().addClass('error');
-              $('#user_password').focus();
-            },
-            success: function(data) {
-              $.ajax({
-                type: 'GET',
-                url: '/sidebar/search',
-                data: {
-                  'flash': {
-                    'notice': "<%= I18n.t("notices.signed_in") %>"
-                  }
-                },
-                success: function(data) {
-                  $('#content').html(data);
-                }
-              });
-            }
-          });
-        }
-      } else if($(this).data('state') === 'user_forgot_password') {
-        if(errors.length > 0) {
-          $(submitButton).attr("disabled", false);
-          errors[0].focus();
-        } else {
-          $.ajax({
-            type: 'POST',
-            url: '/users/password.json',
-            data: {
-              'utf8': '✓',
-              'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
-              'user': {
-                'email': $('#user_email').val()
-              }
-            },
-            error: function(jqXHR) {
-              $(submitButton).attr("disabled", false);
-              $('#user_email').parent().addClass('error');
-              $('#user_email').focus();
-            },
-            success: function() {
-              $(submitButton).attr("disabled", false);
-              $('#user_remembered_password_link').click();
-              $('#user_password').focus();
-            }
-          });
-        }
-      }
-      return false;
-    });
-    $('#adoption_form').live('submit', function() {
-      var submitButton = $("#adoption_form input[type='submit']");
-      $(submitButton).attr("disabled", true);
-      $.ajax({
-        type: 'POST',
-        url: '/things.json',
-        data: {
-          'id': $('#thing_id').val(),
-          'utf8': '✓',
-          'authenticity_token': $('#adoption_form input[name="authenticity_token"]').val(),
-          '_method': 'put',
-          'thing': {
-            'user_id': $('#thing_user_id').val(),
-            'name': $('#thing_name').val()
-          }
-        },
-        error: function(jqXHR) {
-          $(submitButton).attr("disabled", false);
-        },
-        success: function(data) {
-          $.ajax({
-            type: 'GET',
-            url: '/info_window',
-            data: {
-              'thing_id': activeThingId,
-              'flash': {
-                'notice': "<%= I18n.t("notices.adopted", :thing => I18n.t("defaults.thing")) %>"
-              }
-            },
-            success: function(data) {
-              activeInfoWindow.close();
-              activeInfoWindow.setContent(data);
-              activeInfoWindow.open(map, activeMarker);
-              activeMarker.setIcon(greenStarMarkerImage);
-              activeMarker.setAnimation(google.maps.Animation.BOUNCE);
-            }
-          });
-        }
       });
-      return false;
-    });
-    $('#abandon_form').live('submit', function() {
-      var answer = window.confirm("Are you sure you want to abandon this <%= I18n.t("defaults.thing") %>?")
-      if(answer) {
-        var submitButton = $("#abandon_form input[type='submit']");
-        $(submitButton).attr("disabled", true);
-        $.ajax({
-          type: 'POST',
-          url: '/things.json',
-          data: {
-            'id': $('#thing_id').val(),
-            'utf8': '✓',
-            'authenticity_token': $('#abandon_form input[name="authenticity_token"]').val(),
-            '_method': 'put',
-            'thing': {
-              'user_id': $('#thing_user_id').val(),
-              'name': $('#thing_name').val()
-            }
-          },
-          error: function(jqXHR) {
-            $(submitButton).attr("disabled", false);
-          },
-          success: function(thingdata) {
-            $.ajax({
-              type: 'GET',
-              url: '/info_window',
-              data: {
-                'thing_id': activeThingId,
-                'flash': {
-                  'warning': "<%= I18n.t("notices.abandoned", :thing => I18n.t("defaults.thing").capitalize) %>"
-                }
-              },
-              success: function(data_html) {
-                activeInfoWindow.close();
-                activeInfoWindow.setContent(data_html);
-                activeInfoWindow.open(map, activeMarker);
-                if(thingdata.users.length > 0)
-                    activeMarker.setIcon(greenMarkerImage);
-                else
-                    activeMarker.setIcon(orangeMarkerImage);
-                activeMarker.setAnimation(null);
-              }
-            });
-          }
-        }, "json");
-      }
-      return false;
-    });
-    $('#edit_profile_link').live('click', function() {
-      var link = $(this);
-      $(link).addClass('disabled');
-      $.ajax({
-        type: 'GET',
-        url: '/users/edit',
-        error: function(jqXHR) {
-          $(link).removeClass('disabled');
-        },
-        success: function(data) {
-          $('#content').html(data);
-        }
-      });
-      return false;
-    });
-    $('#edit_form').live('submit', function() {
-      var submitButton = $("#edit_form input[type='submit']");
-      $(submitButton).attr("disabled", true);
-      var errors = []
-      if(!/[\w\.%\+\]+@[\w\]+\.+[\w]{2,}/.test($('#user_email').val())) {
-        errors.push($('#user_email'));
-        $('#user_email').parent().addClass('error');
-      } else {
-        $('#user_email').parent().removeClass('error');
-      }
+    }
+  });
+  $('#combo-form').live('submit', function() {
+    var submitButton = $("#combo-form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    var errors = []
+    if(!/[\w\.%\+]+@[\w]+\.+[\w]{2,}/.test($('#user_email').val())) {
+      errors.push($('#user_email'));
+      $('#user_email').parent().addClass('error');
+    } else {
+      $('#user_email').parent().removeClass('error');
+    }
+    if(!$(this).data('state') || $(this).data('state') === 'user_sign_up') {
       if($('#user_name').val() === '') {
         errors.push($('#user_name'));
         $('#user_name').parent().addClass('error');
       } else {
         $('#user_name').parent().removeClass('error');
       }
-      if($('#user_zip').val() != '' && !/^\d{5}(-\d{4})?$/.test($('#user_zip').val())) {
-        errors.push($('#user_zip'));
-        $('#user_zip').parent().addClass('error');
+      if($('#user_password_confirmation').val().length < 6 || $('#user_password_confirmation').val().length > 20) {
+        errors.push($('#user_password_confirmation'));
+        $('#user_password_confirmation').parent().addClass('error');
       } else {
-        $('#user_zip').parent().removeClass('error');
-      }
-      if($('#user_password').val() && ($('#user_password').val().length < 6 || $('#user_password').val().length > 20)) {
-        errors.push($('#user_password'));
-        $('#user_password').parent().addClass('error');
-      } else {
-        $('#user_password').parent().removeClass('error');
-      }
-      if($('#user_current_password').val().length < 6 || $('#user_current_password').val().length > 20) {
-        errors.push($('#user_current_password'));
-        $('#user_current_password').parent().addClass('error');
-      } else {
-        $('#user_current_password').parent().removeClass('error');
+        $('#user_password_confirmation').parent().removeClass('error');
       }
       if(errors.length > 0) {
         $(submitButton).attr("disabled", false);
@@ -671,25 +359,16 @@ $(function() {
           type: 'POST',
           url: '/users.json',
           data: {
-            'id': $('#id').val(),
-            'thing_id': activeThingId,
             'utf8': '✓',
-            'authenticity_token': $('#edit_form input[name="authenticity_token"]').val(),
-            '_method': 'put',
+            'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
             'user': {
               'email': $('#user_email').val(),
               'name': $('#user_name').val(),
               'organization': $('#user_organization').val(),
               'voice_number': $('#user_voice_number').val(),
               'sms_number': $('#user_sms_number').val(),
-              'address_1': $('#user_address_1').val(),
-              'address_2': $('#user_address_2').val(),
-              'city': $('#user_city').val(),
-              'state': $('#user_state').val(),
-              'zip': $('#user_zip').val(),
-              'password': $('#user_password').val(),
-              'password_confirmation': $('#user_password').val(),
-              'current_password': $('#user_current_password').val()
+              'password': $('#user_password_confirmation').val(),
+              'password_confirmation': $('#user_password_confirmation').val()
             }
           },
           error: function(jqXHR) {
@@ -715,146 +394,432 @@ $(function() {
               errors.push($('#user_sms_number'));
               $('#user_sms_number').parent().addClass('error');
             }
-            if(data.errors.address_1) {
-              errors.push($('#user_address_1'));
-              $('#user_address_1').parent().addClass('error');
-            }
-            if(data.errors.address_2) {
-              errors.push($('#user_address_2'));
-              $('#user_address_2').parent().addClass('error');
-            }
-            if(data.errors.city) {
-              errors.push($('#user_city'));
-              $('#user_city').parent().addClass('error');
-            }
-            if(data.errors.state) {
-              errors.push($('#user_state'));
-              $('#user_state').parent().addClass('error');
-            }
-            if(data.errors.zip) {
-              errors.push($('#user_zip'));
-              $('#user_zip').parent().addClass('error');
-            }
             if(data.errors.password) {
-              errors.push($('#user_password'));
-              $('#user_password').parent().addClass('error');
-            }
-            if(data.errors.current_password) {
-              errors.push($('#user_current_password'));
-              $('#user_current_password').parent().addClass('error');
+              errors.push($('#user_password_confirmation'));
+              $('#user_password_confirmation').parent().addClass('error');
             }
             errors[0].focus();
           },
           success: function(data) {
-            $('#content').html(data);
+            $.ajax({
+              type: 'GET',
+              url: '/sidebar/search',
+              data: {
+                'flash': {
+                  'notice': "<%= I18n.t("notices.signed_up") %>"
+                }
+              },
+              success: function(data) {
+                $('#content').html(data);
+              }
+            });
           }
         });
       }
-      return false;
-    });
-    $('#sign_out_link').live('click', function() {
-      var link = $(this);
-      $(link).addClass('disabled');
-      $.ajax({
-        type: 'DELETE',
-        url: '/users/sign_out.json',
-        error: function(jqXHR) {
-          $(link).removeClass('disabled');
-        },
-        success: function(data) {
-          $.ajax({
-            type: 'GET',
-            url: '/sidebar/combo_form',
-            data: {
-              'flash': {
-                'warning': "<%= I18n.t("notices.signed_out") %>"
-              }
-            },
-            success: function(data) {
-              $('#content').html(data);
+    } else if($(this).data('state') === 'user_sign_in') {
+      if($('#user_password').val().length < 6 || $('#user_password').val().length > 20) {
+        errors.push($('#user_password'));
+        $('#user_password').parent().addClass('error');
+      } else {
+        $('#user_password').parent().removeClass('error');
+      }
+      if(errors.length > 0) {
+        $(submitButton).attr("disabled", false);
+        errors[0].focus();
+      } else {
+        $.ajax({
+          type: 'POST',
+          url: '/users/sign_in.json',
+          data: {
+            'utf8': '✓',
+            'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
+            'user': {
+              'email': $('#user_email').val(),
+              'password': $('#user_password').val(),
+              'remember_me': $('#user_remember_me').val()
             }
-          });
+          },
+          error: function(jqXHR) {
+            $(submitButton).attr("disabled", false);
+            $('#user_password').parent().addClass('error');
+            $('#user_password').focus();
+          },
+          success: function(data) {
+            $.ajax({
+              type: 'GET',
+              url: '/sidebar/search',
+              data: {
+                'flash': {
+                  'notice': "<%= I18n.t("notices.signed_in") %>"
+                }
+              },
+              success: function(data) {
+                $('#content').html(data);
+              }
+            });
+          }
+        });
+      }
+    } else if($(this).data('state') === 'user_forgot_password') {
+      if(errors.length > 0) {
+        $(submitButton).attr("disabled", false);
+        errors[0].focus();
+      } else {
+        $.ajax({
+          type: 'POST',
+          url: '/users/password.json',
+          data: {
+            'utf8': '✓',
+            'authenticity_token': $('#combo-form input[name="authenticity_token"]').val(),
+            'user': {
+              'email': $('#user_email').val()
+            }
+          },
+          error: function(jqXHR) {
+            $(submitButton).attr("disabled", false);
+            $('#user_email').parent().addClass('error');
+            $('#user_email').focus();
+          },
+          success: function() {
+            $(submitButton).attr("disabled", false);
+            $('#user_remembered_password_link').click();
+            $('#user_password').focus();
+          }
+        });
+      }
+    }
+    return false;
+  });
+
+  $('#adoption_form').live('submit', function() {
+    var submitButton = $("#adoption_form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    $.ajax({
+      type: 'POST',
+      url: '/things.json',
+      data: {
+        'id': $('#thing_id').val(),
+        'utf8': '✓',
+        'authenticity_token': $('#adoption_form input[name="authenticity_token"]').val(),
+        '_method': 'put',
+        'thing': {
+          'user_id': $('#thing_user_id').val(),
+          'name': $('#thing_name').val()
         }
-      });
-      return false;
+      },
+      error: function(jqXHR) {
+        $(submitButton).attr("disabled", false);
+      },
+      success: function(data) {
+        $.ajax({
+          type: 'GET',
+          url: '/info_window',
+          data: {
+            'thing_id': activeThingId,
+            'flash': {
+              'notice': "<%= I18n.t("notices.adopted", :thing => I18n.t("defaults.thing")) %>"
+            }
+          },
+          success: function(data) {
+            activeInfoWindow.close();
+            activeInfoWindow.setContent(data);
+            activeInfoWindow.open(map, activeMarker);
+            activeMarker.setIcon(greenStarMarkerImage);
+            activeMarker.setAnimation(google.maps.Animation.BOUNCE);
+          }
+        });
+      }
     });
-    $('#sign_in_form').live('submit', function() {
-      var submitButton = $("#sign_in_form input[type='submit']");
-      $(submitButton).attr("disabled", true);
-      $.ajax({
-        type: 'GET',
-        url: '/users/sign_in',
-        error: function(jqXHR) {
-          $(submitButton).attr("disabled", false);
-        },
-        success: function(data) {
-          activeInfoWindow.close();
-          activeInfoWindow.setContent(data);
-          activeInfoWindow.open(map, activeMarker);
-        }
-      });
-      return false;
-    });
-    $('#back_link').live('click', function() {
-      var link = $(this);
-      $(link).addClass('disabled');
-      $.ajax({
-        type: 'GET',
-        url: '/sidebar/search',
-        error: function(jqXHR) {
-          $(link).removeClass('disabled');
-        },
-        success: function(data) {
-          $('#content').html(data);
-        }
-      });
-      return false;
-    });
-    $('#reminder_form').live('submit', function() {
-      var submitButton = $("#reminder_form input[type='submit']");
+    return false;
+  });
+
+  $('#abandon_form').live('submit', function() {
+    var answer = window.confirm("Are you sure you want to abandon this <%= I18n.t("defaults.thing") %>?")
+    if(answer) {
+      var submitButton = $("#abandon_form input[type='submit']");
       $(submitButton).attr("disabled", true);
       $.ajax({
         type: 'POST',
-        url: '/reminders.json',
+        url: '/things.json',
         data: {
+          'id': $('#thing_id').val(),
           'utf8': '✓',
-          'authenticity_token': $('#reminder_form input[name="authenticity_token"]').val(),
-          'reminder': {
-            'from_user_id': $('#reminder_from_user_id').val(),
-            'to_user_id': $('#reminder_to_user_id').val(),
-            'thing_id': activeThingId
+          'authenticity_token': $('#abandon_form input[name="authenticity_token"]').val(),
+          '_method': 'put',
+          'thing': {
+            'user_id': $('#thing_user_id').val(),
+            'name': $('#thing_name').val()
           }
         },
         error: function(jqXHR) {
           $(submitButton).attr("disabled", false);
         },
-        success: function(data) {
+        success: function(thingdata) {
           $.ajax({
             type: 'GET',
             url: '/info_window',
             data: {
               'thing_id': activeThingId,
               'flash': {
-                'notice': "<%= I18n.t("notices.reminder_sent") %>"
+                'warning': "<%= I18n.t("notices.abandoned", :thing => I18n.t("defaults.thing").capitalize) %>"
               }
             },
-            success: function(data) {
+            success: function(data_html) {
               activeInfoWindow.close();
-              activeInfoWindow.setContent(data);
+              activeInfoWindow.setContent(data_html);
               activeInfoWindow.open(map, activeMarker);
+              if(thingdata.users.length > 0)
+                  activeMarker.setIcon(greenMarkerImage);
+              else
+                  activeMarker.setIcon(orangeMarkerImage);
+              activeMarker.setAnimation(null);
             }
           });
         }
-      });
-      return false;
-    });
-    // $('.alert-message').alert();
-    // $('#tos').modal({
-    //   backdrop: true,
-    //   keyboard: true
-    // });       
+      }, "json");
+    }
+    return false;
+  });
 
-  })();
+  $('#edit_profile_link').live('click', function() {
+    var link = $(this);
+    $(link).addClass('disabled');
+    $.ajax({
+      type: 'GET',
+      url: '/users/edit',
+      error: function(jqXHR) {
+        $(link).removeClass('disabled');
+      },
+      success: function(data) {
+        $('#content').html(data);
+      }
+    });
+    return false;
+  });
+
+  $('#edit_form').live('submit', function() {
+    var submitButton = $("#edit_form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    var errors = []
+    if(!/[\w\.%\+\]+@[\w\]+\.+[\w]{2,}/.test($('#user_email').val())) {
+      errors.push($('#user_email'));
+      $('#user_email').parent().addClass('error');
+    } else {
+      $('#user_email').parent().removeClass('error');
+    }
+    if($('#user_name').val() === '') {
+      errors.push($('#user_name'));
+      $('#user_name').parent().addClass('error');
+    } else {
+      $('#user_name').parent().removeClass('error');
+    }
+    if($('#user_zip').val() != '' && !/^\d{5}(-\d{4})?$/.test($('#user_zip').val())) {
+      errors.push($('#user_zip'));
+      $('#user_zip').parent().addClass('error');
+    } else {
+      $('#user_zip').parent().removeClass('error');
+    }
+    if($('#user_password').val() && ($('#user_password').val().length < 6 || $('#user_password').val().length > 20)) {
+      errors.push($('#user_password'));
+      $('#user_password').parent().addClass('error');
+    } else {
+      $('#user_password').parent().removeClass('error');
+    }
+    if($('#user_current_password').val().length < 6 || $('#user_current_password').val().length > 20) {
+      errors.push($('#user_current_password'));
+      $('#user_current_password').parent().addClass('error');
+    } else {
+      $('#user_current_password').parent().removeClass('error');
+    }
+    if(errors.length > 0) {
+      $(submitButton).attr("disabled", false);
+      errors[0].focus();
+    } else {
+      $.ajax({
+        type: 'POST',
+        url: '/users.json',
+        data: {
+          'id': $('#id').val(),
+          'thing_id': activeThingId,
+          'utf8': '✓',
+          'authenticity_token': $('#edit_form input[name="authenticity_token"]').val(),
+          '_method': 'put',
+          'user': {
+            'email': $('#user_email').val(),
+            'name': $('#user_name').val(),
+            'organization': $('#user_organization').val(),
+            'voice_number': $('#user_voice_number').val(),
+            'sms_number': $('#user_sms_number').val(),
+            'address_1': $('#user_address_1').val(),
+            'address_2': $('#user_address_2').val(),
+            'city': $('#user_city').val(),
+            'state': $('#user_state').val(),
+            'zip': $('#user_zip').val(),
+            'password': $('#user_password').val(),
+            'password_confirmation': $('#user_password').val(),
+            'current_password': $('#user_current_password').val()
+          }
+        },
+        error: function(jqXHR) {
+          var data = $.parseJSON(jqXHR.responseText);
+          $(submitButton).attr("disabled", false);
+          if(data.errors.email) {
+            errors.push($('#user_email'));
+            $('#user_email').parent().addClass('error');
+          }
+          if(data.errors.name) {
+            errors.push($('#user_name'));
+            $('#user_name').parent().addClass('error');
+          }
+          if(data.errors.organization) {
+            errors.push($('#user_organization'));
+            $('#user_organization').parent().addClass('error');
+          }
+          if(data.errors.voice_number) {
+            errors.push($('#user_voice_number'));
+            $('#user_voice_number').parent().addClass('error');
+          }
+          if(data.errors.sms_number) {
+            errors.push($('#user_sms_number'));
+            $('#user_sms_number').parent().addClass('error');
+          }
+          if(data.errors.address_1) {
+            errors.push($('#user_address_1'));
+            $('#user_address_1').parent().addClass('error');
+          }
+          if(data.errors.address_2) {
+            errors.push($('#user_address_2'));
+            $('#user_address_2').parent().addClass('error');
+          }
+          if(data.errors.city) {
+            errors.push($('#user_city'));
+            $('#user_city').parent().addClass('error');
+          }
+          if(data.errors.state) {
+            errors.push($('#user_state'));
+            $('#user_state').parent().addClass('error');
+          }
+          if(data.errors.zip) {
+            errors.push($('#user_zip'));
+            $('#user_zip').parent().addClass('error');
+          }
+          if(data.errors.password) {
+            errors.push($('#user_password'));
+            $('#user_password').parent().addClass('error');
+          }
+          if(data.errors.current_password) {
+            errors.push($('#user_current_password'));
+            $('#user_current_password').parent().addClass('error');
+          }
+          errors[0].focus();
+        },
+        success: function(data) {
+          $('#content').html(data);
+        }
+      });
+    }
+    return false;
+  });
+
+  $('#sign_out_link').live('click', function() {
+    var link = $(this);
+    $(link).addClass('disabled');
+    $.ajax({
+      type: 'DELETE',
+      url: '/users/sign_out.json',
+      error: function(jqXHR) {
+        $(link).removeClass('disabled');
+      },
+      success: function(data) {
+        $.ajax({
+          type: 'GET',
+          url: '/sidebar/combo_form',
+          data: {
+            'flash': {
+              'warning': "<%= I18n.t("notices.signed_out") %>"
+            }
+          },
+          success: function(data) {
+            $('#content').html(data);
+          }
+        });
+      }
+    });
+    return false;
+  });
+
+  $('#sign_in_form').live('submit', function() {
+    var submitButton = $("#sign_in_form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    $.ajax({
+      type: 'GET',
+      url: '/users/sign_in',
+      error: function(jqXHR) {
+        $(submitButton).attr("disabled", false);
+      },
+      success: function(data) {
+        activeInfoWindow.close();
+        activeInfoWindow.setContent(data);
+        activeInfoWindow.open(map, activeMarker);
+      }
+    });
+    return false;
+  });
+
+  $('#back_link').live('click', function() {
+    var link = $(this);
+    $(link).addClass('disabled');
+    $.ajax({
+      type: 'GET',
+      url: '/sidebar/search',
+      error: function(jqXHR) {
+        $(link).removeClass('disabled');
+      },
+      success: function(data) {
+        $('#content').html(data);
+      }
+    });
+    return false;
+  });
+
+  $('#reminder_form').live('submit', function() {
+    var submitButton = $("#reminder_form input[type='submit']");
+    $(submitButton).attr("disabled", true);
+    $.ajax({
+      type: 'POST',
+      url: '/reminders.json',
+      data: {
+        'utf8': '✓',
+        'authenticity_token': $('#reminder_form input[name="authenticity_token"]').val(),
+        'reminder': {
+          'from_user_id': $('#reminder_from_user_id').val(),
+          'to_user_id': $('#reminder_to_user_id').val(),
+          'thing_id': activeThingId
+        }
+      },
+      error: function(jqXHR) {
+        $(submitButton).attr("disabled", false);
+      },
+      success: function(data) {
+        $.ajax({
+          type: 'GET',
+          url: '/info_window',
+          data: {
+            'thing_id': activeThingId,
+            'flash': {
+              'notice': "<%= I18n.t("notices.reminder_sent") %>"
+            }
+          },
+          success: function(data) {
+            activeInfoWindow.close();
+            activeInfoWindow.setContent(data);
+            activeInfoWindow.open(map, activeMarker);
+          }
+        });
+      }
+    });
+    return false;
+  });
 
 
 });
