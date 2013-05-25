@@ -2,8 +2,10 @@
   .table-row
     .table-cell.sidebar
       %h2
-        Oakland Adopt a Spot
-        [MAINTAIN A DRAIN]
+        Chattanooga
+        %br
+        Adopt-A-Drain
+        
       #logo
         = image_tag "logos/adoptadrain.png", :alt => t("titles.main", :thing => t("defaults.thing").titleize), :title => t("titles.main", :thing => t("defaults.thing").titleize)
 
@@ -16,10 +18,10 @@
         - else
           = render :partial => "sidebar/combo_form"
       #logos
-        %a{:href => "http://openoakland.org/"}
-          = image_tag "logos/openoakland.png", :width => '180px', :alt => t("sponsors.cfa"), :title => t("sponsors.cfa")
-        %a{:href => "http://www2.oaklandnet.com/"}
-          = image_tag "logos/citytree_green_small.jpg", :width => '90px', :alt => t("sponsors.city"), :title => t("sponsors.city")
+        %a{:href => "http://openchattanooga.com/"}
+          = image_tag "logos/oc_logo_horz.png.png", :width => '180px', :alt => t("sponsors.cfa"), :title => t("sponsors.cfa")
+        %a{:href => "http://www.chattanooga.gov"}
+          = image_tag "logos/city_of_chattanooga.jpg", :width => '90px', :alt => t("sponsors.city"), :title => t("sponsors.city")
 
 
       #feedback
