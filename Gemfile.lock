@@ -55,6 +55,9 @@ GEM
     execjs (1.4.0)
       multi_json (~> 1.0)
     fastercsv (1.5.5)
+    figaro (0.6.4)
+      bundler (~> 1.0)
+      rails (>= 3, < 5)
     font-awesome-sass-rails (3.0.2.2)
       railties (>= 3.1.1)
       sass-rails (>= 3.1.1)
@@ -184,6 +187,7 @@ DEPENDENCIES
   arel
   devise (~> 2.2.0)
   fastercsv
+  figaro
   geokit
   haml (~> 4.0.3)
   http_accept_language

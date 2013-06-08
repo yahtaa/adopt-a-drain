@@ -20,3 +20,8 @@
 # OS X detritus
 .DS_Store
 
+
+# Ignore application configuration
+/config/application.yml
+/config/application_var.rb
+/config/initializers/dev_env.rb

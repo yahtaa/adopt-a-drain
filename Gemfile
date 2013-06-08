@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rails', '~> 3.2'
 
+gem 'figaro'
 gem 'arel'
 gem 'devise', '~> 2.2.0'
 gem 'geokit'
