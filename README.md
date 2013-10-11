@@ -16,7 +16,7 @@ You can see a running version of the application at
 ## <a name="installation"></a>Installation
 This application requires [Postgres](http://www.postgresql.org/) to be installed
 
-    git clone git://github.com/openoakland/adopt-a-drain.git
+    git clone git://github.com/openchattanooga/adopt-a-drain.git
     cd adopt-a-drain
     bundle install
 
